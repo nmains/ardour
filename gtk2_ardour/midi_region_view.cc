@@ -1117,11 +1117,17 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 NoteBase*
 MidiRegionView::find_canvas_note (NoteType note)
 {
-	Events::iterator it;
+	if (_optimization_iterator != _events.end()) {
+		++_optimization_iterator;
+	}
 
-	for (it = _events.begin(); it != _events.end(); ++it) {
-		if (*((*it)->note()) == note) {
-			return *it;
+	if (_optimization_iterator != _events.end() && *((*_optimization_iterator)->note()) == note) {
+		return *_optimization_iterator;
+	}
+
+	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
+		if (*((*_optimization_iterator)->note()) == note) {
+			return *_optimization_iterator;
 		}
 	}
 
@@ -1205,6 +1211,8 @@ MidiRegionView::redisplay_model()
 			for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
 				if (*(*it) == *note) {
 					add_to_selection (cne);
+					_pending_note_selection.erase (it);
+					break;
 				}
 			}
 
@@ -1247,6 +1255,7 @@ MidiRegionView::redisplay_model()
 
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();
+	_optimization_iterator = _events.end();
 	_pending_note_selection.clear ();
 
 	/* we may have caused _events to contain things out of order (e.g. if a note
