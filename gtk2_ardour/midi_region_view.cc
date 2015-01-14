@@ -2701,6 +2701,8 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 			_resize_data.push_back(resize_data);
 		}
 	}
+
+	start_note_diff_command (_("resize notes"));
 }
 
 /** Update resizing notes while user drags.
@@ -2788,8 +2790,6 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 void
 MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative)
 {
-	start_note_diff_command (_("resize notes"));
-
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		Note*  canvas_note = (*i)->note;
 		ArdourCanvas::Rectangle*  resize_rect = (*i)->resize_rect;
